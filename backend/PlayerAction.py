@@ -9,3 +9,5 @@ class PlayerAction(Enum):
     CHECK = auto()  # player skips this turn given none other player made a raise (Game.cur_raise == 0)
 
     CALL = auto()  # player folded
+
+    ALL_IN = auto()     # player went all in

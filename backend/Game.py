@@ -8,7 +8,6 @@ from PlayerStatus import PlayerStatus
 from PlayerAction import PlayerAction
 from PlayersList import PlayersList
 from GameStatus import GameStatus
-from backend.ActionHandler import ActionHandler
 
 
 class Game:
@@ -20,7 +19,6 @@ class Game:
         self.players = PlayersList(players)
         self.players.optimize_order(button)
         self.deck = Deck()
-        self.action_handler = ActionHandler(self)
         self.button_player = players[button]
         self.community_cards = []
         self.pot = 0
@@ -47,9 +45,9 @@ class Game:
                     return
                 
                 if self.players.current_player.status is not PlayerStatus.OUT:
-                    actions = self.action_handler.get_available_action(self.players.current_player)
+                    actions = self.get_available_actions(self.players.current_player)
                     action = self.getAction(actions)
-                    self.action_handler.handle_action(self.players.current_player, action)
+                    self.handle_action(self.players.current_player, action)
                 self.players.next_player()
             
             if self.players.all_checked:
@@ -114,4 +112,57 @@ class Game:
         
         self.settle_game(winners)
 
+    def get_available_actions(self, player):
+        if player.status == PlayerStatus.OUT:
+            return None
+
+        elif player.status == PlayerStatus.TO_CALL:
+            if player.can_bet:
+                return [PlayerAction.CALL, PlayerAction.RAISE, PlayerAction.FOLD, PlayerAction.ALL_IN]
+            else:
+                return [PlayerAction.FOLD, PlayerAction.ALL_IN]
+
+        elif player.status == PlayerStatus.IN:
+            if self.current_raise > 0:
+                return [PlayerAction.CALL, PlayerAction.RAISE, PlayerAction.FOLD, PlayerAction.ALL_IN]
+            else:
+                return [PlayerAction.CALL, PlayerAction.RAISE, PlayerAction.FOLD, PlayerAction.CHECK, PlayerAction.ALL_IN]
+
+        elif player.status == PlayerStatus.CHECKED:
+            return [PlayerAction.CALL, PlayerAction.RAISE, PlayerAction.FOLD, PlayerAction.ALL_IN]
+            
+        elif player.status == PlayerStatus.ALL_IN:
+            return [PlayerAction.CHECK]
+
+    def handle_action(self, player, action):
+        if action == PlayerAction.CALL:
+            to_call = self.current_raise - player.bet
+            player.make_bet(to_call)
+            self.on_the_table += to_call
+            player.change_status(PlayerStatus.IN)
         
+        elif action == PlayerAction.CHECK and player.status is not PlayerStatus.ALL_IN:
+            player.change_status(PlayerStatus.CHECKED)
+
+        elif action == PlayerAction.FOLD:
+            player.change_status(PlayerStatus.OUT)
+
+        elif action == PlayerAction.ALL_IN:
+            player.change_status(PlayerStatus.ALL_IN)
+            to_all = player.bet + player.funds
+            player.make_bet(player.funds)
+            self.game.on_the_table += player.funds
+            if to_all > self.game.current_raise:
+                self.game.current_raise = to_all
+
+
+        elif action == PlayerAction.RAISE:      # assume default raise_option[0]
+            raise_value = Game.raise_options[0]
+
+            if player.can_bet(self.game.current_raise - player.bet + raise_value):
+                player.make_bet(self.game.current_raise - player.bet + raise_value)
+                self.game.current_raise += raise_value
+                self.players.after_raise_update(self.current_raise)
+            else:
+                self.handle_action(player, PlayerAction.ALL_IN)
+

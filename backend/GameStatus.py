@@ -1,7 +1,8 @@
 from enum import Enum, auto
 
 
-class PlayerStatus(Enum):
+class GameStatus(Enum):
+    
     ENDED = auto()
 
     PENDING = auto()

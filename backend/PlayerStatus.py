@@ -6,6 +6,8 @@ class PlayerStatus(Enum):
 
     TO_CALL = auto()  # player should add chips to match the pull
 
-    CHECK = auto()  # player skips this turn given none other player made a currentBet
+    CHECKED = auto()  # player skips this turn given none other player made a currentBet
 
     OUT = auto()  # player folded
+
+    ALL_IN = auto()

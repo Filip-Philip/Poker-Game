@@ -71,3 +71,8 @@ class PlayersList:
     def give_hole_cards(self, deck):
         for player in self.players:
             player.set_hole_cards([deck.draw(), deck.draw()])
+
+    def after_raise_update(self, current_raise):
+        for player in self.players:
+            if player.bet != current_raise and player.status in [PlayerStatus.TO_CALL, PlayerStatus.CHECKED, PlayerStatus.IN]:
+                player.change_status(PlayerStatus.TO_CALL)
