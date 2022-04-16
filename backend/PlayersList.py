@@ -8,7 +8,7 @@ class PlayersList:
     def __init__(self, players):
         self.players = players
         self.number_of_players = len(players)
-        self.current_player
+        self.current_player = None
 
     def change_cur_player(self, player):
         self.current_player = self.players[self.players.index(player)]
@@ -32,7 +32,7 @@ class PlayersList:
         self.change_cur_player(self.players[0])
 
     def next_player(self):
-        self.current_player = self.players[(self.players.index(self.current_player)) % self.number_of_players]
+        self.current_player = self.players[(self.players.index(self.current_player) + 1) % self.number_of_players]
 
     def active_players_number(self):
         i = 0
@@ -43,10 +43,10 @@ class PlayersList:
         return i
 
     def active_players_list(self):
-        active_players = PlayersList([])
+        active_players = []
         for player in self.players:
              if player.status == PlayerStatus.IN:
-                active_players.add_player(player)
+                active_players.append(player)
 
         return active_players
 
@@ -56,21 +56,23 @@ class PlayersList:
 
     def can_end_betting(self):
         for player in self.players:
-            if player.status not in [PlayerStatus.IN, PlayerStatus.OUT, PlayerStatus.ALL_IN]:
-                return False
-
-        return True
-
-    def all_checked(self):
-        for player in self.players:
-            if player.status not in [PlayerStatus.CHECK, PlayerStatus.OUT, PlayerStatus.ALL_IN]:
+            if player.status not in [PlayerStatus.IN, PlayerStatus.CHECKED, PlayerStatus.OUT, PlayerStatus.ALL_IN]:
                 return False
 
         return True
 
     def give_hole_cards(self, deck):
         for player in self.players:
-            player.set_hole_cards([deck.draw(), deck.draw()])
+            player.set_hole_cards(deck.draw_card(), deck.draw_card())
+
+    def clear_bets(self):
+        for player in self.players:
+            player.bet = 0
+
+    def new_turn(self):
+        for player in self.players:
+            if player.status not in [PlayerStatus.OUT, PlayerStatus.ALL_IN]:
+                player.change_status(PlayerStatus.IN)
 
     def after_raise_update(self, current_raise):
         for player in self.players:
