@@ -1,5 +1,5 @@
-from PlayerStatus import PlayerStatus
-from PlayerAction import PlayerAction
+from backend.PlayerStatus import PlayerStatus
+from backend.PlayerAction import PlayerAction
 
 
 class Player:

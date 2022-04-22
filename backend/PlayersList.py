@@ -1,7 +1,7 @@
-from PlayerStatus import PlayerStatus
-from PlayerAction import PlayerAction
-from Deck import Deck
-from Player import Player
+from backend.PlayerStatus import PlayerStatus
+from backend.PlayerAction import PlayerAction
+from backend.Deck import Deck
+from backend.Player import Player
 
 class PlayersList:
 

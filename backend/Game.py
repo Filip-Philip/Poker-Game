@@ -4,14 +4,14 @@ from pickle import TRUE
 from re import S
 
 from numpy import empty
-from Deck import Deck
-from Hand import Hand
-from Card import Card
-from Player import Player
-from PlayerStatus import PlayerStatus
-from PlayerAction import PlayerAction
-from PlayersList import PlayersList
-from GameStatus import GameStatus
+from backend.Deck import Deck
+from backend.Hand import Hand
+from backend.Card import Card
+from backend.Player import Player
+from backend.PlayerStatus import PlayerStatus
+from backend.PlayerAction import PlayerAction
+from backend.PlayersList import PlayersList
+from backend.GameStatus import GameStatus
 
 
 class Game:
@@ -155,7 +155,7 @@ class Game:
                 return [PlayerAction.FOLD, PlayerAction.ALL_IN]
 
         elif player.status == PlayerStatus.IN:
-                return [PlayerAction.RAISE, PlayerAction.FOLD, PlayerAction.CHECK, PlayerAction.ALL_IN]
+            return [PlayerAction.RAISE, PlayerAction.FOLD, PlayerAction.CHECK, PlayerAction.ALL_IN]
 
         elif player.status == PlayerStatus.CHECKED:
             return [PlayerAction.CALL, PlayerAction.RAISE, PlayerAction.FOLD, PlayerAction.ALL_IN]
