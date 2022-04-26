@@ -46,9 +46,9 @@ class Game:
         while TRUE:
             for i in range (0, self.players.number_of_players):
                 self.print_game_info()
-                if self.players.active_players_number == 1:
+                if self.players.active_players_number() == 1:
                     self.add_bets_to_pot()
-                    self.settle_game([self.players.current_player])
+                    self.settle_game(self.players.current_player)
                     return
                 
                 if self.players.current_player.status is not PlayerStatus.OUT:

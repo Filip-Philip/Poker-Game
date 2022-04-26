@@ -37,7 +37,7 @@ class PlayersList:
     def active_players_number(self):
         i = 0
         for player in self.players:
-             if player.status == PlayerStatus.IN:
+             if player.status != PlayerStatus.OUT:
                 i += 1
 
         return i
