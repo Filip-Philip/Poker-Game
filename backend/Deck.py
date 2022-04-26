@@ -1,6 +1,6 @@
-from Type import Type
-from Suit import Suit
-from Card import Card
+from backend.Type import Type
+from backend.Suit import Suit
+from backend.Card import Card
 from random import shuffle
 
 
