@@ -211,26 +211,20 @@ class Gui:
     def run(self):
         clock = pygame.time.Clock()
         run = True
-        self.game.print_game_info()
         self.game.change_game_status()
         self.draw_window()
         self.add_buttons()
         while run:
             clock.tick(self.FPS)
             if self.game.can_end_betting() and self.game.status < GameStatus.SHOWDOWN:
-                self.game.add_bets_to_pot()
                 self.game.change_game_status()
-                self.game.print_game_info()
 
             if not self.game.can_still_play():
                 self.game.settle_game()
-                self.game.print_game_info()
 
             if self.game.status is GameStatus.ENDED:
-                self.game.print_game_info()
                 self.game = Game(self.game.players.list, (self.game.button + 1) % len(self.game.players.list))
                 self.game.change_game_status()
-                self.game.print_game_info()
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -238,12 +232,9 @@ class Gui:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     for button in self.buttons:
                         if button.checkForInput():
-                            self.game_update(button.action)
+                            self.game.handle_action(self.game.players.current_player, button.action)
 
             self.draw_window()
 
         pygame.quit()
         sys.exit()
-
-    def game_update(self, action):
-        self.game.handle_action(self.game.players.current_player, action)

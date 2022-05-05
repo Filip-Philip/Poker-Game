@@ -77,6 +77,7 @@ class Game:
 
     def change_game_status(self):
         self.status = self.status.next()
+        self.add_bets_to_pot()
         if self.status == GameStatus.PREFLOP:
             self.the_pre_flop()
         if self.status == GameStatus.FLOP:
