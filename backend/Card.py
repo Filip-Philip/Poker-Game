@@ -60,7 +60,7 @@ class Card:
             path.append('Q.png')
         elif self.type == Type.KING:
             path.append('K.png')
-        elif self.type == Type.QUEEN:
+        elif self.type == Type.ACE:
             path.append('A.png')
 
         return os.path.join(path[0], path[1], path[2], path[3])

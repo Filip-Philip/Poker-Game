@@ -1,31 +1,38 @@
 import pygame
 import os
+import sys
 import operator
 from backend.GameStatus import GameStatus
+from backend.Game import Game
 from backend.PlayerStatus import PlayerStatus
 from sympy.solvers import solve
 from sympy import Symbol
+from GUI.button import Button
+from backend.PlayerAction import PlayerAction
 
 WHITE = (255, 255, 255)
+RED = (255, 0, 0)
 
 
 class Gui:
-    FPS = 1
+    FPS = 30
     CARD_IMAGE_REDUCTION_VALUE = 10
+    pygame.init()
 
     def __init__(self, width, height, game):
+        self.buttons = []
         self.width = width
         self.height = height
         self.game = game
         self.placement_of_deck = (self.width // 4.7, int(self.height // 2.5))
         self.card_size = (self.height // self.CARD_IMAGE_REDUCTION_VALUE, self.width // self.CARD_IMAGE_REDUCTION_VALUE)
+        self.button_size = (self.width // 5, self.height // 10)
         self.cards_overlapping = (self.card_size[0] // 3, self.card_size[1] // 5)
         self.players_coordinates = dict()
         self.farthest_card = (0, 0)
         self.space_between_cards = (self.width // 20, 0)
         self.window = pygame.display.set_mode((width, height))
         pygame.display.set_caption('Poker Game')
-        self.game.status = GameStatus.TURN
 
     def add_pot(self):
         pot = None
@@ -50,14 +57,46 @@ class Gui:
             pot = pygame.transform.scale(pot, pot_image_size)
             self.window.blit(pot, pot_placement)
 
+    def add_buttons(self):
+        call = Button(self.width // 10, 19 * self.height // 20,
+                      pygame.transform.scale(pygame.image.load(os.path.join('images', 'Buttons', 'button.png')),
+                                             self.button_size), PlayerAction.CALL)
+        self.buttons.append(call)
+        call.update_button(self.window)
+
+        fold = Button(3 * self.width // 10, 19 * self.height // 20,
+                      pygame.transform.scale(pygame.image.load(os.path.join('images', 'Buttons', 'button.png')),
+                                             self.button_size), PlayerAction.FOLD)
+        self.buttons.append(fold)
+        fold.update_button(self.window)
+
+        check = Button(5 * self.width // 10, 19 * self.height // 20,
+                       pygame.transform.scale(pygame.image.load(os.path.join('images', 'Buttons', 'button.png')),
+                                              self.button_size), PlayerAction.CHECK)
+        self.buttons.append(check)
+        check.update_button(self.window)
+
+        raise_b = Button(7 * self.width // 10, 19 * self.height // 20,
+                         pygame.transform.scale(pygame.image.load(os.path.join('images', 'Buttons', 'button.png')),
+                                                self.button_size), PlayerAction.RAISE)
+        self.buttons.append(raise_b)
+        raise_b.update_button(self.window)
+
+        all_in = Button(9 * self.width // 10, 19 * self.height // 20,
+                        pygame.transform.scale(pygame.image.load(os.path.join('images', 'Buttons', 'button.png')),
+                                               self.button_size), PlayerAction.ALL_IN)
+        self.buttons.append(all_in)
+        all_in.update_button(self.window)
+
     def show_hands(self):
-        for player in self.game.players.players:
+        for player in self.game.players.list:
             if player.status != PlayerStatus.OUT:
-                coordinates_of_player = self.players_coordinates[player]
+                coordinates_of_player = self.players_coordinates[player.name]
                 card1 = player.hole_cards[0]
                 card2 = player.hole_cards[1]
                 self.add_card(card1, coordinates_of_player)
-                coordinates_of_player = (coordinates_of_player[0] + self.cards_overlapping[0], coordinates_of_player[1] + self.cards_overlapping[1])
+                coordinates_of_player = (coordinates_of_player[0] + self.cards_overlapping[0],
+                                         coordinates_of_player[1] + self.cards_overlapping[1])
                 self.add_card(card2, coordinates_of_player)
                 self.window.blit(card2, coordinates_of_player)
 
@@ -68,17 +107,20 @@ class Gui:
         if self.game.status >= GameStatus.STARTED:
             self.add_deck()
 
-        if GameStatus.SHOWDOWN > self.game.status >= GameStatus.PREFLOP:
+        if self.game.status >= GameStatus.PREFLOP:
             self.deal_cards()
 
         for card in self.game.community_cards:
             self.add_card(card)
 
-        if GameStatus.PREFLOP <= self.game.status <= GameStatus.RIVER:
-            pass
-            #betting
         if self.game.status == GameStatus.SHOWDOWN:
             self.show_hands()
+
+        self.show_statuses()
+        self.add_pot()
+        for button in self.buttons:
+            button.update_button(self.window)
+            button.changeColor()
         pygame.display.update()
 
     def add_table(self, table='BLUE'):
@@ -111,7 +153,7 @@ class Gui:
         solution_x = solution_x[0]
         if solution_x > a:
             return
-        solution_y = solve(solution_x**2 / a**2 + y**2 / b**2 - 1, y)
+        solution_y = solve(solution_x ** 2 / a ** 2 + y ** 2 / b ** 2 - 1, y)
         # print(f'y = {solution_y}')
         if solution_y[0] <= 0:
             solution_y = solution_y[0]
@@ -119,22 +161,42 @@ class Gui:
             solution_y = solution_y[1]
 
         # print(f'final coordinates of next point = {(solution_x + self.width / 2, -solution_y + self.height / 2)}')
-        return solution_x + self.width / 2, -solution_y + self.height / 2
+        return solution_x + self.width / 2, -solution_y + self.height / 2 - self.height // 6
 
     def deal_cards(self, reverse='RED', player_view=None):
         card = self.get_scaled_reverse(reverse)
         a, b = (7 * self.width // 8) / 2, (4 * self.height // 6) / 2  # to not be too close to the edges of the board
         distance_between_players = 2 * a / (self.game.players.number_of_players - 1)
-        start_position = ((self.width - 2 * a) / 2, self.height / 2)
+        start_position = ((self.width - 2 * a) / 2, self.height / 2 - self.height // 6)
         # print(f'a = {a}, b = {b}')
         # print(f'dist between players = {distance_between_players}')
-        for player in self.game.players.players:
-            self.players_coordinates[player] = start_position
+        for player in self.game.players.list:
+            card = pygame.image.load(player.hole_cards[0].get_path_to_image())
+            card = pygame.transform.scale(card, self.card_size)
+            self.players_coordinates[player.name] = start_position
             # print(f'point = {start_position}')
             self.window.blit(card, start_position)
-            start_position_second_card = (start_position[0] + self.cards_overlapping[0], start_position[1] - self.cards_overlapping[1])
+            card = pygame.image.load(player.hole_cards[1].get_path_to_image())
+            card = pygame.transform.scale(card, self.card_size)
+            start_position_second_card = (
+                start_position[0] + self.cards_overlapping[0], start_position[1] - self.cards_overlapping[1])
             self.window.blit(card, start_position_second_card)
             start_position = self.find_next_point_on_ellipse(a, b, start_position, distance_between_players)
+
+    def show_statuses(self):
+        font = pygame.font.Font("freesansbold.ttf", 16)
+        info = font.render(self.game.status.name + " Current player: " +
+                           self.game.players.current_player.name + " In pot = " + str(self.game.pot) +
+                           " On the table = " + str(self.game.on_the_table) +
+                           " Current raise = " + str(self.game.current_raise),
+                           True,
+                           WHITE)
+        self.window.blit(info, (0, 0))
+        for player in self.game.players.list:
+            info = font.render(player.get_info(), True, RED)
+            coordinates_of_player = self.players_coordinates[player.name][0] - self.card_size[0], \
+                                    self.players_coordinates[player.name][1]
+            self.window.blit(info, coordinates_of_player)
 
     def add_card(self, card, card_placement=None):
         if card is None:
@@ -149,12 +211,39 @@ class Gui:
     def run(self):
         clock = pygame.time.Clock()
         run = True
+        self.game.print_game_info()
+        self.game.change_game_status()
+        self.draw_window()
+        self.add_buttons()
         while run:
             clock.tick(self.FPS)
+            if self.game.can_end_betting() and self.game.status < GameStatus.SHOWDOWN:
+                self.game.add_bets_to_pot()
+                self.game.change_game_status()
+                self.game.print_game_info()
+
+            if not self.game.can_still_play():
+                self.game.settle_game()
+                self.game.print_game_info()
+
+            if self.game.status is GameStatus.ENDED:
+                self.game.print_game_info()
+                self.game = Game(self.game.players.list, (self.game.button + 1) % len(self.game.players.list))
+                self.game.change_game_status()
+                self.game.print_game_info()
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    for button in self.buttons:
+                        if button.checkForInput():
+                            self.game_update(button.action)
 
             self.draw_window()
-        pygame.quit()
 
+        pygame.quit()
+        sys.exit()
+
+    def game_update(self, action):
+        self.game.handle_action(self.game.players.current_player, action)

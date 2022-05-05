@@ -2,6 +2,8 @@ from enum import Enum, auto
 
 
 class PlayerStatus(Enum):
+    TO_MOVE = auto()  # player has yet to take a turn
+
     IN = auto()  # player in game with enough chips
 
     TO_CALL = auto()  # player should add chips to match the pull

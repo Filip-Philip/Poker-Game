@@ -29,3 +29,7 @@ class GameStatus(Enum):
             return self.value < other.value
 
         return NotImplemented
+
+    def next(self):
+        next = self.value + 1
+        return GameStatus(next)

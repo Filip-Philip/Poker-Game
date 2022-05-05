@@ -8,7 +8,7 @@ class Player:
         self.name = name
         self.funds = funds
         self.hole_cards = []
-        self.status = PlayerStatus.TO_CALL
+        self.status = PlayerStatus.TO_MOVE
         self.bet = 0
 
     def set_hole_cards(self, card1, card2):
@@ -30,3 +30,7 @@ class Player:
 
     def get_pot(self, pot):
         self.funds += pot
+
+    def get_info(self):
+        info = self.name + "-" + self.status.name + "-" + str(self.funds) + "-" + str(self.bet)
+        return info
