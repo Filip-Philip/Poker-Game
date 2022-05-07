@@ -13,6 +13,6 @@ player4 = Player("player4", 100)
 player5 = Player("player5", 100)
 #
 
-game = Game([player1, player2, player3], 0)
+game = Game([player1, player2, player3, player4], 0)
 gui = Gui(WIDTH, HEIGHT, game)
 gui.run()
