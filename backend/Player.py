@@ -3,6 +3,7 @@ from backend.PlayerAction import PlayerAction
 
 
 class Player:
+    STARTING_FUNDS = 100
 
     def __init__(self, name, funds):
         self.name = name

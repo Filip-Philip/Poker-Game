@@ -165,12 +165,13 @@ class Gui:
         return (position[0] - (self.card_size[0] + self.cards_overlapping[0]) // 2,
                 position[1] + (self.card_size[1] + self.cards_overlapping[1]) // 5)
 
-    def deal_cards(self, reverse='RED', player_view=None):
+    def deal_cards(self, reverse='RED', player_view=None, is_showdown=False):
         a, b = (7 * self.width // 8) / 2, (4 * self.height // 6) / 2  # to not be too close to the edges of the board
         distance_between_players = 2 * a / (self.game.players.number_of_players - 1)
         start_position = ((self.width - 2 * a) / 2,
                           2 * self.height / 6)
 
+        # use players_coordinates when not None instead of calculating start_position all the time
         for player in self.game.players.list:
             card = pygame.image.load(player.hole_cards[0].get_path_to_image())
             card = pygame.transform.scale(card, self.card_size)
