@@ -2,6 +2,29 @@ from backend.PlayerStatus import PlayerStatus
 from backend.PlayerAction import PlayerAction
 
 
+def get_available_actions(player):
+    if player.status == PlayerStatus.TO_MOVE:
+        return [PlayerAction.RAISE, PlayerAction.CHECK, PlayerAction.FOLD, PlayerAction.ALL_IN]
+
+    if player.status == PlayerStatus.OUT:
+        return []
+
+    elif player.status == PlayerStatus.TO_CALL:
+        if player.can_bet:
+            return [PlayerAction.CALL, PlayerAction.RAISE, PlayerAction.FOLD, PlayerAction.ALL_IN]
+        else:
+            return [PlayerAction.FOLD, PlayerAction.ALL_IN]
+
+    elif player.status == PlayerStatus.IN:
+        return [PlayerAction.RAISE, PlayerAction.FOLD, PlayerAction.CHECK, PlayerAction.ALL_IN]
+
+    elif player.status == PlayerStatus.CHECKED:
+        return [PlayerAction.CALL, PlayerAction.RAISE, PlayerAction.FOLD, PlayerAction.ALL_IN]
+
+    elif player.status == PlayerStatus.ALL_IN:
+        return []
+
+
 class Player:
 
     def __init__(self, name, funds):
@@ -32,5 +55,6 @@ class Player:
         self.funds += pot
 
     def get_info(self):
-        info = self.name + "-" + self.status.name + "-" + str(self.funds) + "-" + str(self.bet)
-        return info
+        info = self.name + '-' + self.status.name + '-' + str(self.funds) + '-' + str(self.bet)
+        info = "%s||\n%s||\n%s||\n%s" % (self.name, self.status.name, str(self.funds), str(self.bet))
+        return self.name, self.status.name, str(self.funds), str(self.bet)

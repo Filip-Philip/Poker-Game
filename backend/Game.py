@@ -3,7 +3,6 @@ from operator import truediv
 from pickle import TRUE
 from re import S
 
-from numpy import empty
 from backend.Deck import Deck
 from backend.Hand import Hand
 from backend.Card import Card
@@ -12,29 +11,7 @@ from backend.PlayerStatus import PlayerStatus
 from backend.PlayerAction import PlayerAction
 from backend.PlayersList import PlayersList
 from backend.GameStatus import GameStatus
-
-
-def get_available_actions(player):
-    if player.status == PlayerStatus.TO_MOVE:
-        return [PlayerAction.RAISE, PlayerAction.CHECK, PlayerAction.FOLD, PlayerAction.ALL_IN]
-
-    if player.status == PlayerStatus.OUT:
-        return []
-
-    elif player.status == PlayerStatus.TO_CALL:
-        if player.can_bet:
-            return [PlayerAction.CALL, PlayerAction.RAISE, PlayerAction.FOLD, PlayerAction.ALL_IN]
-        else:
-            return [PlayerAction.FOLD, PlayerAction.ALL_IN]
-
-    elif player.status == PlayerStatus.IN:
-        return [PlayerAction.RAISE, PlayerAction.FOLD, PlayerAction.CHECK, PlayerAction.ALL_IN]
-
-    elif player.status == PlayerStatus.CHECKED:
-        return [PlayerAction.CALL, PlayerAction.RAISE, PlayerAction.FOLD, PlayerAction.ALL_IN]
-
-    elif player.status == PlayerStatus.ALL_IN:
-        return []
+from backend.Player import get_available_actions
 
 
 class Game:
@@ -55,6 +32,7 @@ class Game:
         self.on_the_table = 0
         self.current_raise = 0
         self.status = GameStatus.STARTED
+        self.winners = None
 
     def settle_game(self):
         self.add_bets_to_pot()
@@ -62,9 +40,8 @@ class Game:
             winner = self.players.get_last_player()
             winner.get_pot(self.pot)
         else:
-            winners = self.showdown()
-            reward = self.pot // len(winners)
-            for winner in winners:
+            reward = self.pot // len(self.winners)
+            for winner in self.winners:
                 winner.get_pot(reward)
 
         self.pot = 0
@@ -87,7 +64,7 @@ class Game:
         if self.status == GameStatus.RIVER:
             self.the_river()
         if self.status == GameStatus.SHOWDOWN:
-            self.settle_game()
+            self.showdown()
         if self.status == GameStatus.ENDED:
             self.settle_game()
 
@@ -138,9 +115,9 @@ class Game:
     def showdown(self):
         self.players.new_turn()
         active_players = self.players.active_players_list()
-        winners = [active_players[0]]
+        self.winners = [active_players[0]]
         winner_hand = Hand()
-        winner_hand.choose_best(self.community_cards + winners[0].hole_cards)
+        winner_hand.choose_best(self.community_cards + self.winners[0].hole_cards)
         hand = Hand()
 
         for i in range(1, len(active_players)):
@@ -149,13 +126,11 @@ class Game:
             if hand < winner_hand:
                 pass
             elif hand == winner_hand:
-                winners.append(active_players[i])
+                self.winners.append(active_players[i])
             else:
-                winners.clear()
-                winners.append(active_players[i])
+                self.winners.clear()
+                self.winners.append(active_players[i])
                 winner_hand.cards = hand.cards
-
-        return winners
 
     def handle_action(self, player, action):
         if action not in get_available_actions(player):
