@@ -22,7 +22,7 @@ class Gui:
     CARD_IMAGE_REDUCTION_VALUE = 10
     pygame.init()
 
-    def __init__(self, width, height, game, player, send_fun):
+    def __init__(self, width, height, game, main_player, send_fun):
         self.buttons = []
         self.width = width
         self.height = height
@@ -35,7 +35,7 @@ class Gui:
         self.farthest_card = (0, 0)
         self.space_between_cards = (self.width // 20, 0)
         self.window = pygame.display.set_mode((width, height))
-        self.player = player
+        self.main_player = main_player
         self.send_fun = send_fun
         pygame.display.set_caption('Poker Game')
 
@@ -161,7 +161,7 @@ class Gui:
                           2 * self.height / 6)
 
         for player in self.game.players.list:
-            if player == self.player or \
+            if player == self.main_player or \
                     (self.game.status is GameStatus.SHOWDOWN and player.status is not PlayerStatus.OUT):
                 card = pygame.image.load(player.hole_cards[0].get_path_to_image())
                 card = pygame.transform.scale(card, self.card_size)
@@ -174,7 +174,7 @@ class Gui:
             self.window.blit(card, start_position)
             start_position = copy(aux_position)
 
-            if player == self.player or \
+            if player == self.main_player or \
                     (self.game.status is GameStatus.SHOWDOWN and player.status is not PlayerStatus.OUT):
                 card = pygame.image.load(player.hole_cards[0].get_path_to_image())
                 card = pygame.transform.scale(card, self.card_size)
@@ -207,7 +207,6 @@ class Gui:
                 else:
                     info = font.render(info, True, RED)
 
-
                 coordinates_of_player = self.players_coordinates[player.name][0], \
                                         self.players_coordinates[player.name][1] - 0.1 * self.card_size[0] - i * 16
                 self.window.blit(info, coordinates_of_player)
@@ -225,13 +224,14 @@ class Gui:
     def run(self):
         clock = pygame.time.Clock()
         run = True
+        self.game.change_game_status()
         self.draw_window()
         self.add_buttons()
         while run:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
-                if event.type == pygame.MOUSEBUTTONDOWN and self.game.players.current_player == self.player:
+                if event.type == pygame.MOUSEBUTTONDOWN and self.game.players.current_player == self.main_player:
                     for button in self.buttons:
                         if button.checkForInput():
                             self.send_fun(button.action)
