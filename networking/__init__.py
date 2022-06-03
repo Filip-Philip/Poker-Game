@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-from server import Server
-
-server = Server()
-server.start()
-=======
 # from server import Server
 # from backend.Player import Player
 # from backend.Game import Game
@@ -17,4 +11,3 @@ server.start()
 # game.print_game_info()
 # server = Server(game)
 # server.start()
->>>>>>> 06c1c6b4682d88ab2e448074b747e3a1b3543a0f
