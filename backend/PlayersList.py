@@ -19,17 +19,18 @@ class PlayersList:
         self.number_of_players += 1
 
     def optimize_order(self, button):
-        game_order = [0] * self.number_of_players
-        i = button
-        j = 0
+        if self.number_of_players > 0: # <----
+            game_order = [0] * self.number_of_players
+            i = button
+            j = 0
 
-        while j < self.number_of_players:
-            game_order[j] = i % self.number_of_players
-            j += 1
-            i += 1
+            while j < self.number_of_players:
+                game_order[j] = i % self.number_of_players
+                j += 1
+                i += 1
 
-        self.list = [self.list[i] for i in game_order]
-        self.change_cur_player(self.list[0])
+            self.list = [self.list[i] for i in game_order]
+            self.change_cur_player(self.list[0])
 
     def next_player(self):
         self.current_player = self.list[(self.list.index(self.current_player) + 1) % self.number_of_players]

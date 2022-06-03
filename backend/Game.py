@@ -21,12 +21,13 @@ class Game:
 
     def __init__(self, players, button):
         self.players = PlayersList(players)
-        self.players.optimize_order(button)
+        # self.players.optimize_order(button) <---
         self.deck = Deck()
         self.deck.fill_deck()
         self.deck.shuffle_deck()
         self.button = button
-        self.button_player = players[button]
+        # self.button_player = players[button] <----
+        self.button_player = None # <----
         self.community_cards = []
         self.pot = 0
         self.on_the_table = 0
@@ -56,6 +57,10 @@ class Game:
         self.status = self.status.next()
         self.add_bets_to_pot()
         if self.status == GameStatus.PREFLOP:
+            #added <---
+            self.players.optimize_order(self.button)
+            self.button_player = self.players.list[self.button]
+            #added <---
             self.the_pre_flop()
         if self.status == GameStatus.FLOP:
             self.the_flop()

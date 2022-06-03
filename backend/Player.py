@@ -26,6 +26,7 @@ def get_available_actions(player):
 
 
 class Player:
+    STARTING_FUNDS = 100
 
     def __init__(self, name, funds):
         self.name = name

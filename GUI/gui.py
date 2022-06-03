@@ -149,17 +149,30 @@ class Gui:
             solution_y = solution_y[1]
 
         return solution_x + self.width / 2, -solution_y + 2 * self.height / 6
+<<<<<<< HEAD
 
     def adjust_card_coordinates(self, position):
         return (position[0] - (self.card_size[0] + self.cards_overlapping[0]) // 2,
                 position[1] + (self.card_size[1] + self.cards_overlapping[1]) // 5)
 
     def deal_cards(self, reverse='RED'):
+=======
+
+    def adjust_card_coordinates(self, position):
+        return (position[0] - (self.card_size[0] + self.cards_overlapping[0]) // 2,
+                position[1] + (self.card_size[1] + self.cards_overlapping[1]) // 5)
+
+    def deal_cards(self, reverse='RED', player_view=None, is_showdown=False):
+>>>>>>> 06c1c6b4682d88ab2e448074b747e3a1b3543a0f
         a, b = (7 * self.width // 8) / 2, (4 * self.height // 6) / 2  # to not be too close to the edges of the board
         distance_between_players = 2 * a / (self.game.players.number_of_players - 1)
         start_position = ((self.width - 2 * a) / 2,
                           2 * self.height / 6)
 
+<<<<<<< HEAD
+=======
+        # use players_coordinates when not None instead of calculating start_position all the time
+>>>>>>> 06c1c6b4682d88ab2e448074b747e3a1b3543a0f
         for player in self.game.players.list:
             if player == self.player or \
                     (self.game.status is GameStatus.SHOWDOWN and player.status is not PlayerStatus.OUT):
@@ -173,6 +186,7 @@ class Gui:
             start_position = self.adjust_card_coordinates(start_position)
             self.window.blit(card, start_position)
             start_position = copy(aux_position)
+<<<<<<< HEAD
 
             if player == self.player or \
                     (self.game.status is GameStatus.SHOWDOWN and player.status is not PlayerStatus.OUT):
@@ -181,6 +195,10 @@ class Gui:
             else:
                 card = self.get_scaled_reverse(reverse)
 
+=======
+            card = pygame.image.load(player.hole_cards[1].get_path_to_image())
+            card = pygame.transform.scale(card, self.card_size)
+>>>>>>> 06c1c6b4682d88ab2e448074b747e3a1b3543a0f
             start_position_second_card = (
                 start_position[0] + self.cards_overlapping[0], start_position[1] - self.cards_overlapping[1])
             start_position_second_card = self.adjust_card_coordinates(start_position_second_card)
