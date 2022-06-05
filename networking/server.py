@@ -1,6 +1,8 @@
 import socket
 import threading
 import pickle
+
+from backend.GameStatus import GameStatus
 from backend.Player import Player
 from backend.Game import Game
 from time import sleep
@@ -62,7 +64,8 @@ class Server:
         while self.timer < self.WAITING_TIME:
             sleep(1)
             self.timer += 1
-        self.game.change_game_status()
+        if self.game.status < GameStatus.PREFLOP:
+            self.game.change_game_status()
         print("Game started!")
         self.game.print_game_info()
 
@@ -86,11 +89,6 @@ class Server:
 
 
 if __name__ == "__main__":
-    player1 = Player("player1", 100)
-    player2 = Player("player2", 100)
-    player3 = Player("player3", 100)
-
-    # game = Game([player1, player2, player3], 0)
     game = Game([], 0)
     game.print_game_info()
     server = Server(game)

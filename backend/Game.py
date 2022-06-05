@@ -27,7 +27,7 @@ class Game:
         self.deck.shuffle_deck()
         self.button = button
         # self.button_player = players[button] <----
-        self.button_player = None # <----
+        self.button_player = None  # <----
         self.community_cards = []
         self.pot = 0
         self.on_the_table = 0
@@ -57,10 +57,8 @@ class Game:
         self.status = self.status.next()
         self.add_bets_to_pot()
         if self.status == GameStatus.PREFLOP:
-            #added <---
             self.players.optimize_order(self.button)
             self.button_player = self.players.list[self.button]
-            #added <---
             self.the_pre_flop()
         if self.status == GameStatus.FLOP:
             self.the_flop()
@@ -137,6 +135,8 @@ class Game:
                 self.winners.append(active_players[i])
                 winner_hand.cards = hand.cards
 
+        self.change_game_status()
+
     def handle_action(self, player, action):
         if action not in get_available_actions(player):
             return
@@ -174,13 +174,21 @@ class Game:
 
         self.players.next_player()
 
+        if self.status < GameStatus.SHOWDOWN and self.can_end_betting():
+            self.change_game_status()
+
+        if not self.can_still_play():
+            self.settle_game()
+
     def print_game_info(self):
         print(self.status)
         print("In pot: ", self.pot)
         print("On the table: ", self.on_the_table)
         print("Current raise: ", self.current_raise)
+        if self.players.current_player is not None:
+            print("Current player: ", self.players.current_player.name)
         print("Players info:")
-        print("name", "status", "bet", sep="   ")
+        print("name", "status", "bet", "funds", sep="   ")
         for player in self.players.list:
-            print(player.name, player.status, player.bet, sep="   ")
+            print(player.name, player.status, player.bet, player.funds, sep="   ")
         print()

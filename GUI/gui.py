@@ -97,8 +97,10 @@ class Gui:
         self.window.fill(WHITE)
         self.add_table()
         self.add_pot()
-        if self.game.status >= GameStatus.STARTED:
-            self.add_deck()
+        self.add_deck()
+        if self.game is None:
+            pygame.display.update()
+            return
 
         if self.game.status >= GameStatus.PREFLOP:
             self.deal_cards()
@@ -161,7 +163,7 @@ class Gui:
                           2 * self.height / 6)
 
         for player in self.game.players.list:
-            if player == self.main_player or \
+            if player.name == self.main_player or \
                     (self.game.status is GameStatus.SHOWDOWN and player.status is not PlayerStatus.OUT):
                 card = pygame.image.load(player.hole_cards[0].get_path_to_image())
                 card = pygame.transform.scale(card, self.card_size)
@@ -174,7 +176,7 @@ class Gui:
             self.window.blit(card, start_position)
             start_position = copy(aux_position)
 
-            if player == self.main_player or \
+            if player.name == self.main_player or \
                     (self.game.status is GameStatus.SHOWDOWN and player.status is not PlayerStatus.OUT):
                 card = pygame.image.load(player.hole_cards[0].get_path_to_image())
                 card = pygame.transform.scale(card, self.card_size)
@@ -231,7 +233,7 @@ class Gui:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
-                if event.type == pygame.MOUSEBUTTONDOWN and self.game.players.current_player == self.main_player:
+                if event.type == pygame.MOUSEBUTTONDOWN and self.game.players.current_player.name == self.main_player:
                     for button in self.buttons:
                         if button.checkForInput():
                             self.send_fun(button.action)
