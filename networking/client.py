@@ -4,6 +4,7 @@ from backend.PlayerAction import PlayerAction
 from backend.Game import Game
 import threading
 import sys
+from GUI.gui import Gui
 
 
 class Client:
@@ -19,6 +20,7 @@ class Client:
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client.connect(self.ADDRESS)
         self.player_id = player_id
+        self.game = None
 
     def send(self, msg):
         message = pickle.dumps(msg)
@@ -40,7 +42,7 @@ class Client:
                     connected = False
 
                 # if type(message) == Game:
-                message.print_game_info()
+                self.game = message
                 print(f"[{address}] {message}")
                 # connection.send("Message received".encode(self.FORMAT))
 
@@ -56,16 +58,7 @@ if __name__ == "__main__":
     client = Client(player_nickname)
     client.send(player_nickname)
     client.start()
-    action = None
-    while action != "q":
-        action = input("Action: ")
-        if action == "raise":
-            client.send(PlayerAction.RAISE)
-        elif action == "fold":
-            client.send(PlayerAction.FOLD)
-        elif action == "check":
-            client.send(PlayerAction.CHECK)
-        elif action == "call":
-            client.send(PlayerAction.CALL)
+    gui = Gui(1000, 550, client)
+    gui.run()
 
     client.send(client.DISCONNECT_MESSAGE)

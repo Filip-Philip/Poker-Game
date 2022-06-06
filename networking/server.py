@@ -66,8 +66,9 @@ class Server:
             self.timer += 1
         if self.game.status < GameStatus.PREFLOP:
             self.game.change_game_status()
-        print("Game started!")
-        self.game.print_game_info()
+            self.update_all_clients()
+            print("Game started!")
+            self.game.print_game_info()
 
     def start(self):
         self.server.listen()
