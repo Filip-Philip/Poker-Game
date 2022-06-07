@@ -18,7 +18,7 @@ def action_to_string(action):
 
 
 class Button:
-    def __init__(self, x_pos, y_pos, image, action, font=40):
+    def __init__(self, x_pos, y_pos, image, action, font=30):
         self.action = action
         self.font = pygame.font.SysFont("cambria", font)
         self.image = image

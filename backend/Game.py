@@ -15,7 +15,6 @@ class Game:
 
     def __init__(self, players):
         self.players = PlayersList(players)
-        # self.players.optimize_order(button) <---
         self.deck = Deck()
         self.deck.fill_deck()
         self.deck.shuffle_deck()
@@ -74,8 +73,12 @@ class Game:
         self.deck.shuffle_deck()
         self.community_cards = []
         self.winners = None
-        self.players.button_player = self.players.next_player()
+
         self.players.reset_players_statuses()
+        self.players.current_player = self.players.button_player
+        self.players.next_player()
+        self.players.button_player = self.players.current_player
+
         self.change_game_status(GameStatus.PREFLOP)
 
     def can_end_betting(self):
@@ -148,14 +151,14 @@ class Game:
         self.settle_game()
 
     def handle_action(self, player, action):
+        if self.status == GameStatus.SHOWDOWN:
+            self.change_game_status()
+            return
+
         if player is not self.players.current_player:
             return
 
         if action not in get_available_actions(player):
-            return
-
-        if self.status == GameStatus.SHOWDOWN:
-            self.change_game_status()
             return
 
         if action == PlayerAction.CALL:
@@ -200,7 +203,8 @@ class Game:
 
     def print_game_info(self):
         print(self.status)
-        # print("Dealer: ", self.button_player.name)
+        if self.players.button_player is not None:
+            print("Dealer: ", self.players.button_player.name)
         print("In pot: ", self.pot)
         print("On the table: ", self.on_the_table)
         print("Current raise: ", self.current_raise)

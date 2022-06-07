@@ -92,11 +92,13 @@ class Gui:
             coordinates = [0, 0]
             coordinates[0] = self.players_coordinates[player.name][0] + self.status_field_size[0] // 2
             coordinates[1] = self.players_coordinates[player.name][1] - self.status_field_size[1] // 2
-            info_field = StatusWindow(coordinates[0], coordinates[1], pad, player)
+            if player.name == self.client.player_id:
+                info_field = StatusWindow(coordinates[0], coordinates[1], pad, player, "yellow")
+            else:
+                info_field = StatusWindow(coordinates[0], coordinates[1], pad, player)
             self.status_fields[player.name] = info_field
 
     def redraw_window(self):
-        print("REDRAWING")
         self.window.fill(WHITE)
         self.add_table()
         self.add_deck()
@@ -110,10 +112,16 @@ class Gui:
             button.update_button(self.window)
 
         for player in self.client.game.players.list:
-            if player == self.client.game.button_player:
-                self.status_fields[player.name].update_status(self.window, player, True)
+            if player == self.client.game.players.button_player:
+                if player.status is PlayerStatus.OUT:
+                    self.status_fields[player.name].update_status(self.window, player, is_dealer=True, is_in=False)
+                else:
+                    self.status_fields[player.name].update_status(self.window, player, is_dealer=True)
             else:
-                self.status_fields[player.name].update_status(self.window, player)
+                if player.status is PlayerStatus.OUT:
+                    self.status_fields[player.name].update_status(self.window, player, is_in=False)
+                else:
+                    self.status_fields[player.name].update_status(self.window, player)
 
         self.add_pot()
 
@@ -154,7 +162,7 @@ class Gui:
         else:
             solution_y = solution_y[1]
 
-        return solution_x + self.width / 2 - 100, -solution_y + 2 * self.height / 6
+        return solution_x + self.width / 2, -solution_y + 2 * self.height / 6
 
     def adjust_card_coordinates(self, position):
         return (position[0] + self.cards_overlapping[0],
@@ -201,7 +209,7 @@ class Gui:
     def add_card(self, card, card_placement=None):
         if card is None:
             return
-        card = pygame.image.load(card.get_path_to_image())
+        card = pygame.image.load(card.get_path_to_image()).convert()
         card = pygame.transform.scale(card, self.card_size)
         if card_placement is None:
             card_placement = tuple(map(operator.add, self.farthest_card, self.space_between_cards))
@@ -223,9 +231,9 @@ class Gui:
                 # TODO: start menu
             elif self.in_game is False:
                 self.in_game = True
+                print("Game started")
                 self.calc_cards_coordinates()
                 self.add_status_fields()
-                pygame.time.delay(500)
 
             if self.client.to_update:
                 self.redraw_window()
@@ -234,8 +242,7 @@ class Gui:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     run = False
-                if event.type == pygame.MOUSEBUTTONDOWN and self.client.game.status >= GameStatus.PREFLOP\
-                        and self.client.player_id is self.client.game.players.current_player.name:
+                if event.type == pygame.MOUSEBUTTONDOWN and self.client.game.status >= GameStatus.PREFLOP:
                     for button in self.buttons:
                         if button.check_fot_input():
                             self.client.send(button.action)

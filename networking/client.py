@@ -59,7 +59,7 @@ if __name__ == "__main__":
     client = Client(player_nickname)
     client.send(player_nickname)
     client.start()
-    gui = Gui(1500, 800, client)
+    gui = Gui(900, 480, client)
     gui.run()
 
     client.send(client.DISCONNECT_MESSAGE)
