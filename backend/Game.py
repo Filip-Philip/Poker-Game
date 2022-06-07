@@ -1,17 +1,11 @@
-from argparse import Action
-from operator import truediv
-from pickle import TRUE
-from re import S
-
 from backend.Deck import Deck
 from backend.Hand import Hand
-from backend.Card import Card
-from backend.Player import Player
 from backend.PlayerStatus import PlayerStatus
 from backend.PlayerAction import PlayerAction
 from backend.PlayersList import PlayersList
 from backend.GameStatus import GameStatus
 from backend.Player import get_available_actions
+import random
 
 
 class Game:
@@ -19,15 +13,14 @@ class Game:
     big_blind = 2
     raise_options = [1, 2, 5]
 
-    def __init__(self, players, button):
+    def __init__(self, players):
         self.players = PlayersList(players)
         # self.players.optimize_order(button) <---
         self.deck = Deck()
         self.deck.fill_deck()
         self.deck.shuffle_deck()
-        self.button = button
-        # self.button_player = players[button] <----
-        self.button_player = None  # <----
+        self.button = None
+        self.button_player = None
         self.community_cards = []
         self.pot = 0
         self.on_the_table = 0
@@ -35,30 +28,16 @@ class Game:
         self.status = GameStatus.STARTED
         self.winners = None
 
-    def settle_game(self):
-        self.add_bets_to_pot()
-        if self.players.active_players_number() == 1:
-            winner = self.players.get_last_player()
-            winner.get_pot(self.pot)
+    def change_game_status(self, new_status=None):
+        if new_status is None:
+            self.status = self.status.next()
         else:
-            reward = self.pot // len(self.winners)
-            for winner in self.winners:
-                winner.get_pot(reward)
+            self.status = new_status
 
-        self.pot = 0
-        self.status = GameStatus.ENDED
-
-    def add_bets_to_pot(self):
-        self.pot += self.on_the_table
-        self.on_the_table = 0
-        self.players.clear_bets()
-
-    def change_game_status(self):
-        self.status = self.status.next()
         self.add_bets_to_pot()
         if self.status == GameStatus.PREFLOP:
-            self.players.optimize_order(self.button)
-            self.button_player = self.players.list[self.button]
+            if self.players.button_player is None:
+                self.players.button_player = self.players.list[random.randrange(0, len(self.players.list))]
             self.the_pre_flop()
         if self.status == GameStatus.FLOP:
             self.the_flop()
@@ -69,7 +48,35 @@ class Game:
         if self.status == GameStatus.SHOWDOWN:
             self.showdown()
         if self.status == GameStatus.ENDED:
-            self.settle_game()
+            self.start_new_game()
+
+    def settle_game(self):
+        self.status = GameStatus.SHOWDOWN
+        self.add_bets_to_pot()
+        if self.players.active_players_number() == 1:
+            winner = self.players.get_last_player()
+            winner.get_pot(self.pot)
+        else:
+            reward = self.pot // len(self.winners)
+            for winner in self.winners:
+                winner.get_pot(reward)
+
+        self.pot = 0
+
+    def add_bets_to_pot(self):
+        self.pot += self.on_the_table
+        self.on_the_table = 0
+        self.players.clear_bets()
+
+    def start_new_game(self):
+        self.deck = Deck()
+        self.deck.fill_deck()
+        self.deck.shuffle_deck()
+        self.community_cards = []
+        self.winners = None
+        self.players.button_player = self.players.next_player()
+        self.players.reset_players_statuses()
+        self.change_game_status(GameStatus.PREFLOP)
 
     def can_end_betting(self):
         for player in self.players.list:
@@ -83,6 +90,8 @@ class Game:
         return True
 
     def the_pre_flop(self):
+        self.players.new_turn()
+
         for player in self.players.list:
             player.change_status(PlayerStatus.TO_CALL)
         self.on_the_table += Game.big_blind + Game.small_blind
@@ -90,6 +99,7 @@ class Game:
 
         self.players.give_hole_cards(self.deck)
 
+        self.players.next_player()
         self.players.current_player.make_bet(Game.small_blind)
 
         self.players.next_player()
@@ -135,11 +145,16 @@ class Game:
                 self.winners.append(active_players[i])
                 winner_hand.cards = hand.cards
 
-        self.change_game_status()
+        self.settle_game()
 
     def handle_action(self, player, action):
         if action not in get_available_actions(player):
             return
+
+        if self.status == GameStatus.SHOWDOWN:
+            self.change_game_status()
+            return
+
         if action == PlayerAction.CALL:
             to_call = self.current_raise - player.bet
             player.make_bet(to_call)

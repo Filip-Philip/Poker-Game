@@ -90,7 +90,7 @@ class Server:
 
 
 if __name__ == "__main__":
-    game = Game([], 0)
+    game = Game([])
     game.print_game_info()
     server = Server(game)
     server.start()

@@ -43,7 +43,6 @@ class Client:
 
                 # if type(message) == Game:
                 self.game = message
-                print(f"[{address}] {message}")
                 # connection.send("Message received".encode(self.FORMAT))
 
     def start(self):
@@ -58,7 +57,7 @@ if __name__ == "__main__":
     client = Client(player_nickname)
     client.send(player_nickname)
     client.start()
-    gui = Gui(1000, 550, client)
+    gui = Gui(1200, 640, client)
     gui.run()
 
     client.send(client.DISCONNECT_MESSAGE)

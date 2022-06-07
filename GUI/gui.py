@@ -10,11 +10,11 @@ from sympy.solvers import solve
 from sympy import Symbol
 from GUI.button import Button
 from backend.PlayerAction import PlayerAction
-from time import sleep
 
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 BLUE = (135, 206, 250)
+CARD = (3, 5)
 
 
 class Gui:
@@ -29,7 +29,7 @@ class Gui:
         self.placement_of_deck = (self.width // 4.7, self.height // 2.9)
         self.card_size = (self.height // self.CARD_IMAGE_REDUCTION_VALUE, self.width // self.CARD_IMAGE_REDUCTION_VALUE)
         self.button_size = (self.width // 5, self.height // 10)
-        self.cards_overlapping = (self.card_size[0] // 3, self.card_size[1] // 5)
+        self.cards_overlapping = (self.card_size[0] // 3, self.card_size[1] // 4)
         self.players_coordinates = dict()
         self.farthest_card = (0, 0)
         self.space_between_cards = (self.width // 20, 0)
@@ -52,7 +52,7 @@ class Gui:
         if 48 < self.client.game.pot <= 60:
             pot = pygame.image.load(os.path.join('images', 'Chips', '60.png'))
         if 60 < self.client.game.pot:
-            pot = pygame.image.load(os.path.join('images', 'Chips', '72.png'))
+            pot = pygame.image.load(os.path.join('images', 'Chips', '72.png')).convert()
 
         if pot is not None:
             pot_placement = (self.width // 2.3, self.height // 20)
@@ -65,33 +65,28 @@ class Gui:
                       pygame.transform.scale(pygame.image.load(os.path.join('images', 'Buttons', 'button.png')),
                                              self.button_size), PlayerAction.CALL)
         self.buttons.append(call)
-        call.update_button(self.window)
 
         fold = Button(3 * self.width // 10, 19 * self.height // 20,
                       pygame.transform.scale(pygame.image.load(os.path.join('images', 'Buttons', 'button.png')),
                                              self.button_size), PlayerAction.FOLD)
         self.buttons.append(fold)
-        fold.update_button(self.window)
 
         check = Button(5 * self.width // 10, 19 * self.height // 20,
                        pygame.transform.scale(pygame.image.load(os.path.join('images', 'Buttons', 'button.png')),
                                               self.button_size), PlayerAction.CHECK)
         self.buttons.append(check)
-        check.update_button(self.window)
 
         raise_b = Button(7 * self.width // 10, 19 * self.height // 20,
                          pygame.transform.scale(pygame.image.load(os.path.join('images', 'Buttons', 'button.png')),
                                                 self.button_size), PlayerAction.RAISE)
         self.buttons.append(raise_b)
-        raise_b.update_button(self.window)
 
         all_in = Button(9 * self.width // 10, 19 * self.height // 20,
                         pygame.transform.scale(pygame.image.load(os.path.join('images', 'Buttons', 'button.png')),
                                                self.button_size), PlayerAction.ALL_IN)
         self.buttons.append(all_in)
-        all_in.update_button(self.window)
 
-    def draw_window(self):
+    def redraw_window(self):
         self.window.fill(WHITE)
         self.add_table()
         self.add_deck()
@@ -99,14 +94,13 @@ class Gui:
             pygame.display.update()
             return
 
-        if self.client.game.status >= GameStatus.PREFLOP:
-            self.deal_cards()
+        if len(self.players_coordinates) > 0:
+            self.draw_hole_cards()
+            self.show_statuses()
 
         for card in self.client.game.community_cards:
             self.add_card(card)
 
-        self.add_pot()
-        self.show_statuses()
         self.add_pot()
         for button in self.buttons:
             button.update_button(self.window)
@@ -115,17 +109,17 @@ class Gui:
 
     def add_table(self, table='BLUE'):
         if table == 'BLUE':
-            table_layout = pygame.image.load(os.path.join('images', 'Tables', 'table1.png'))
+            table_layout = pygame.image.load(os.path.join('images', 'Tables', 'table1.png')).convert()
         elif table == 'RED':
-            table_layout = pygame.image.load(os.path.join('images', 'Tables', 'table2.png'))
+            table_layout = pygame.image.load(os.path.join('images', 'Tables', 'table2.png')).convert()
         table_layout = pygame.transform.scale(table_layout, (self.width, self.height))
         self.window.blit(table_layout, (0, 0))
 
     def get_scaled_reverse(self, reverse):
         if reverse == 'RED':
-            deck = pygame.image.load(os.path.join('images', 'Reverses', '4.png'))
+            deck = pygame.image.load(os.path.join('images', 'Reverses', '4.png')).convert()
         elif reverse == 'BLUE':
-            deck = pygame.image.load(os.path.join('images', 'Reverses', '1.png'))
+            deck = pygame.image.load(os.path.join('images', 'Reverses', '1.png')).convert()
         deck = pygame.transform.scale(deck, self.card_size)
         return deck
 
@@ -154,38 +148,39 @@ class Gui:
         return (position[0] - (self.card_size[0] + self.cards_overlapping[0]) // 2,
                 position[1] + (self.card_size[1] + self.cards_overlapping[1]) // 5)
 
-    def deal_cards(self, reverse='RED'):
+    def calc_cards_coordinates(self):
         a, b = (7 * self.width // 8) / 2, (4 * self.height // 6) / 2  # to not be too close to the edges of the board
         distance_between_players = 2 * a / (self.client.game.players.number_of_players - 1)
         start_position = ((self.width - 2 * a) / 2,
                           2 * self.height / 6)
 
         for player in self.client.game.players.list:
-            if player.name == self.client.player_id or \
-                    (self.client.game.status >= GameStatus.SHOWDOWN and player.status is not PlayerStatus.OUT):
-                card = pygame.image.load(player.hole_cards[0].get_path_to_image())
-                card = pygame.transform.scale(card, self.card_size)
-            else:
-                card = self.get_scaled_reverse(reverse)
-
             self.players_coordinates[player.name] = start_position
-            aux_position = copy(start_position)
-            start_position = self.adjust_card_coordinates(start_position)
-            self.window.blit(card, start_position)
-            start_position = copy(aux_position)
+            start_position = self.find_next_point_on_ellipse(a, b, start_position, distance_between_players)
 
+    def draw_hole_cards(self, reverse='RED'):
+        for player in self.client.game.players.list:
             if player.name == self.client.player_id or \
                     (self.client.game.status >= GameStatus.SHOWDOWN and player.status is not PlayerStatus.OUT):
-                card = pygame.image.load(player.hole_cards[0].get_path_to_image())
+                card = pygame.image.load(player.hole_cards[0].get_path_to_image()).convert()
                 card = pygame.transform.scale(card, self.card_size)
             else:
                 card = self.get_scaled_reverse(reverse)
 
-            start_position_second_card = (
-                start_position[0] + self.cards_overlapping[0], start_position[1] - self.cards_overlapping[1])
-            start_position_second_card = self.adjust_card_coordinates(start_position_second_card)
-            self.window.blit(card, start_position_second_card)
-            start_position = self.find_next_point_on_ellipse(a, b, start_position, distance_between_players)
+            pos_first_card = self.adjust_card_coordinates(self.players_coordinates[player.name])
+            self.window.blit(card, pos_first_card)
+
+            if player.name == self.client.player_id or \
+                    (self.client.game.status >= GameStatus.SHOWDOWN and player.status is not PlayerStatus.OUT):
+                card = pygame.image.load(player.hole_cards[1].get_path_to_image()).convert()
+                card = pygame.transform.scale(card, self.card_size)
+            else:
+                card = self.get_scaled_reverse(reverse)
+
+            pos_second_card = (
+                pos_first_card[0] + self.cards_overlapping[0], pos_first_card[1] - self.cards_overlapping[1])
+            pos_second_card = self.adjust_card_coordinates(pos_second_card)
+            self.window.blit(card, pos_second_card)
 
     def show_statuses(self):
         font = pygame.font.Font("freesansbold.ttf", int(0.1 * self.card_size[1]))
@@ -214,7 +209,7 @@ class Gui:
     def add_card(self, card, card_placement=None):
         if card is None:
             return
-        card = pygame.image.load(card.get_path_to_image())
+        card = pygame.image.load(card.get_path_to_image()).convert()
         card = pygame.transform.scale(card, self.card_size)
         if card_placement is None:
             card_placement = tuple(map(operator.add, self.farthest_card, self.space_between_cards))
@@ -227,6 +222,8 @@ class Gui:
         run = True
         while run:
             for event in pygame.event.get():
+                if self.client.game is not None and len(self.players_coordinates) == 0:
+                    self.calc_cards_coordinates()
                 if event.type == pygame.QUIT:
                     run = False
                 if event.type == pygame.MOUSEBUTTONDOWN and self.client.game.players.current_player.name == self.client.player_id:
@@ -234,7 +231,7 @@ class Gui:
                         if button.checkForInput():
                             self.client.send(button.action)
 
-            self.draw_window()
+            self.redraw_window()
 
         pygame.quit()
         sys.exit()

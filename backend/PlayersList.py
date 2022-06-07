@@ -7,6 +7,7 @@ from backend.Player import Player
 class PlayersList:
 
     def __init__(self, players):
+        self.button_player = None
         self.list = players
         self.number_of_players = len(players)
         self.current_player = None
@@ -19,7 +20,7 @@ class PlayersList:
         self.number_of_players += 1
 
     def optimize_order(self, button):
-        if self.number_of_players > 0: # <----
+        if self.number_of_players > 0:
             game_order = [0] * self.number_of_players
             i = button
             j = 0
@@ -81,7 +82,7 @@ class PlayersList:
         for player in self.list:
             if player.status not in [PlayerStatus.OUT, PlayerStatus.ALL_IN]:
                 player.change_status(PlayerStatus.TO_MOVE)
-        self.current_player = self.list[0]
+        self.current_player = self.button_player
         if self.current_player.status in [PlayerStatus.OUT, PlayerStatus.ALL_IN]:
             self.next_player()
 
