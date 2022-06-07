@@ -44,7 +44,6 @@ class Client:
 
                 # if type(message) == Game:
                 self.game = message
-                self.game.print_game_info()
                 self.to_update = True
                 # connection.send("Message received".encode(self.FORMAT))
 
@@ -60,7 +59,7 @@ if __name__ == "__main__":
     client = Client(player_nickname)
     client.send(player_nickname)
     client.start()
-    gui = Gui(1200, 640, client)
+    gui = Gui(1500, 800, client)
     gui.run()
 
     client.send(client.DISCONNECT_MESSAGE)

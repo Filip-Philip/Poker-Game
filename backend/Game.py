@@ -148,6 +148,9 @@ class Game:
         self.settle_game()
 
     def handle_action(self, player, action):
+        if player is not self.players.current_player:
+            return
+
         if action not in get_available_actions(player):
             return
 
@@ -197,6 +200,7 @@ class Game:
 
     def print_game_info(self):
         print(self.status)
+        # print("Dealer: ", self.button_player.name)
         print("In pot: ", self.pot)
         print("On the table: ", self.on_the_table)
         print("Current raise: ", self.current_raise)
@@ -207,3 +211,5 @@ class Game:
         for player in self.players.list:
             print(player.name, player.status, player.bet, player.funds, sep="   ")
         print()
+
+    # TODO: str
