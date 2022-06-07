@@ -36,6 +36,7 @@ class Player:
         self.bet = 0
 
     def set_hole_cards(self, card1, card2):
+        self.hole_cards.clear()
         self.hole_cards.append(card1)
         self.hole_cards.append(card2)
 
@@ -56,6 +57,4 @@ class Player:
         self.funds += pot
 
     def get_info(self):
-        info = self.name + '-' + self.status.name + '-' + str(self.funds) + '-' + str(self.bet)
-        info = "%s||\n%s||\n%s||\n%s" % (self.name, self.status.name, str(self.funds), str(self.bet))
-        return self.name, self.status.name, str(self.funds), str(self.bet)
+        return self.name, str(self.funds) + " - " + str(self.bet), self.status.name

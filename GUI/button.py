@@ -18,7 +18,7 @@ def action_to_string(action):
 
 
 class Button:
-    def __init__(self, x_pos, y_pos, image, action, font=40):
+    def __init__(self, x_pos, y_pos, image, action, font=30):
         self.action = action
         self.font = pygame.font.SysFont("cambria", font)
         self.image = image
@@ -37,7 +37,8 @@ class Button:
     def checkForInput(self):
         is_action = False
         position = pygame.mouse.get_pos()
-        if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top, self.rect.bottom):
+        if position[0] in range(self.rect.left, self.rect.right) and position[1] in range(self.rect.top,
+                                                                                          self.rect.bottom):
             is_action = True
 
         return is_action
@@ -49,3 +50,4 @@ class Button:
             self.text = self.font.render(self.text_input, True, "green")
         else:
             self.text = self.font.render(self.text_input, True, "white")
+

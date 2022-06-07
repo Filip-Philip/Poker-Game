@@ -21,6 +21,7 @@ class Client:
         self.client.connect(self.ADDRESS)
         self.player_id = player_id
         self.game = None
+        self.to_update = False
 
     def send(self, msg):
         message = pickle.dumps(msg)
@@ -43,6 +44,8 @@ class Client:
 
                 # if type(message) == Game:
                 self.game = message
+                self.game.print_game_info()
+                self.to_update = True
                 # connection.send("Message received".encode(self.FORMAT))
 
     def start(self):
