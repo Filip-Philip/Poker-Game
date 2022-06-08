@@ -15,7 +15,7 @@ class Server:
     ADDRESS = (SERVER, PORT)
     FORMAT = 'utf-8'
     DISCONNECT_MESSAGE = "!DISCONNECT"
-    WAITING_TIME = 30
+    WAITING_TIME = 60
 
     def __init__(self, game):
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -35,13 +35,14 @@ class Server:
 
     def handle_client(self, connection, address):
         print(f"[NEW CONNECTION] {address} connected")
-
+        self.active_clients[(connection, address)] = None
         message_length = connection.recv(self.HEADER).decode(self.FORMAT)
         if message_length:
             message_length = int(message_length)
             player_name = pickle.loads(connection.recv(message_length))
             self.active_clients[(connection, address)] = Player(player_name, Player.STARTING_FUNDS)
             self.game.players.add_player(self.active_clients[(connection, address)])
+            self.update_all_clients() # added
 
         connected = True
         while connected:
@@ -63,7 +64,7 @@ class Server:
         connection.close()
 
     def track_waiting(self):
-        while self.timer < self.WAITING_TIME:
+        while self.timer < self.WAITING_TIME or self.game.players.number_of_players < 2:
             sleep(1)
             self.timer += 1
         if self.game.status < GameStatus.PREFLOP:

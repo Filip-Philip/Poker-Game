@@ -16,10 +16,10 @@ class Client:
     SERVER = socket.gethostbyname(socket.gethostname())
     ADDRESS = (SERVER, PORT)
 
-    def __init__(self, player_id):
+    def __init__(self): #player id
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client.connect(self.ADDRESS)
-        self.player_id = player_id
+        self.player_id = None
         self.game = None
         self.to_update = False
 
@@ -44,6 +44,7 @@ class Client:
 
                 # if type(message) == Game:
                 self.game = message
+                self.game.print_game_info()
                 self.to_update = True
                 # connection.send("Message received".encode(self.FORMAT))
 
@@ -56,8 +57,8 @@ class Client:
 
 if __name__ == "__main__":
     player_nickname = sys.argv[1]
-    client = Client(player_nickname)
-    client.send(player_nickname)
+    client = Client()
+    # client.send(player_nickname)
     client.start()
     gui = Gui(900, 480, client)
     gui.run()

@@ -9,6 +9,7 @@ from sympy import Symbol
 from GUI.button import Button
 from backend.PlayerAction import PlayerAction
 from GUI.status_window import StatusWindow
+from GUI.TextInputBox import TextInputBox
 
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
@@ -162,7 +163,7 @@ class Gui:
         else:
             solution_y = solution_y[1]
 
-        return solution_x + self.width / 2, -solution_y + 2 * self.height / 6
+        return solution_x + self.width / 2 - self.card_size[0] / 2, -solution_y + 1.8 * self.height / 6 # here changed
 
     def adjust_card_coordinates(self, position):
         return (position[0] + self.cards_overlapping[0],
@@ -170,9 +171,11 @@ class Gui:
 
     def calc_cards_coordinates(self):
         a, b = (7 * self.width // 8) / 2, (4 * self.height // 6) / 2  # to not be too close to the edges of the board
-        distance_between_players = 2 * a / (self.client.game.players.number_of_players - 1)
-        start_position = ((self.width - 2 * a) / 2,
-                          2 * self.height / 6)
+        try:
+            distance_between_players = 2 * a / (self.client.game.players.number_of_players - 1)
+        except ZeroDivisionError as error:
+            print(error, "Number of players has to be greater than 1!", sep='\n')
+        start_position = ((self.width - 2 * a) / 2, self.height / 2 - self.card_size[1] / 2) # here changed
 
         for player in self.client.game.players.list:
             self.players_coordinates[player.name] = start_position
@@ -182,10 +185,13 @@ class Gui:
         for player in self.client.game.players.list:
             if player.name == self.client.player_id or \
                     (self.client.game.status >= GameStatus.SHOWDOWN and player.status is not PlayerStatus.OUT):
-                card1 = pygame.image.load(player.hole_cards[0].get_path_to_image())
-                card1 = pygame.transform.scale(card1, self.card_size)
-                card2 = pygame.image.load(player.hole_cards[1].get_path_to_image())
-                card2 = pygame.transform.scale(card2, self.card_size)
+                try:
+                    card1 = pygame.image.load(player.hole_cards[0].get_path_to_image())
+                    card1 = pygame.transform.scale(card1, self.card_size)
+                    card2 = pygame.image.load(player.hole_cards[1].get_path_to_image())
+                    card2 = pygame.transform.scale(card2, self.card_size)
+                except IndexError as error:
+                    print(error, "Cards not dealt yet!", sep='\n')
             else:
                 card1 = self.get_scaled_reverse(reverse)
                 card2 = self.get_scaled_reverse(reverse)
@@ -222,14 +228,34 @@ class Gui:
         self.add_table()
         self.add_deck()
         self.add_buttons()
+        font = pygame.font.SysFont(None, 100)
+        text_input_box = TextInputBox(50, 50, 400, font)
+        group = pygame.sprite.Group(text_input_box)
         pygame.display.update()
         while run:
             if self.client.game is None:
+                while text_input_box.active:
+                    event_list = pygame.event.get()
+                    for event in event_list:
+                        if event.type == pygame.QUIT:
+                            run = False
+                            text_input_box.active = False
+                    group.update(event_list)
+                    group.draw(self.window)
+                    pygame.display.flip()
+
+                self.client.player_id = text_input_box.text
+                self.client.send(text_input_box.text)
                 pygame.time.delay(1000)
                 print("WAIT")
+                self.client.game.print_game_info()
                 continue
-                # TODO: start menu
-            elif self.in_game is False:
+
+            elif self.client.game is not None and self.client.game.status == GameStatus.STARTED:
+                while self.client.game.status == GameStatus.STARTED:
+                    pygame.time.delay(1000)
+
+            if self.in_game is False:
                 self.in_game = True
                 print("Game started")
                 self.calc_cards_coordinates()
@@ -253,5 +279,6 @@ class Gui:
 
             pygame.display.update(self.dirty_rect)
 
+        pygame.display.quit()
         pygame.quit()
         sys.exit()
