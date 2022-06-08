@@ -87,6 +87,11 @@ class Game:
                 return False
         return True
 
+    def betting_not_required(self):
+        if self.players.betting_players_number() < 2:
+            return True
+        return False
+
     def can_still_play(self):
         if self.players.active_players_number() == 1:
             return False
@@ -129,7 +134,6 @@ class Game:
         self.community_cards.append(self.deck.draw_card())
 
     def showdown(self):
-        self.players.new_turn()
         active_players = self.players.active_players_list()
         self.winners = [active_players[0]]
         winner_hand = Hand()
@@ -163,9 +167,14 @@ class Game:
 
         if action == PlayerAction.CALL:
             to_call = self.current_raise - player.bet
-            player.make_bet(to_call)
-            self.on_the_table += to_call
-            player.change_status(PlayerStatus.IN)
+            if player.can_bet(to_call):
+                player.make_bet(to_call)
+                self.on_the_table += to_call
+                player.change_status(PlayerStatus.IN)
+            else:
+                self.on_the_table += player.funds
+                player.make_bet(player.funds)
+                player.change_status(PlayerStatus.ALL_IN)
 
         elif action == PlayerAction.CHECK:
             player.change_status(PlayerStatus.CHECKED)
@@ -191,15 +200,23 @@ class Game:
                 self.players.after_raise_update(self.current_raise)
                 player.change_status(PlayerStatus.IN)
             else:
-                self.handle_action(player, PlayerAction.ALL_IN)
+                self.on_the_table += player.funds
+                player.make_bet(player.funds)
+                player.change_status(PlayerStatus.ALL_IN)
 
-        self.players.next_player()
+        if self.betting_not_required():
+            while len(self.community_cards) < 5:
+                self.community_cards.append(self.deck.draw_card())
+            self.change_game_status(GameStatus.SHOWDOWN)
+            return
 
         if self.status < GameStatus.SHOWDOWN and self.can_end_betting():
             self.change_game_status()
 
         if not self.can_still_play():
             self.settle_game()
+
+        self.players.next_player()
 
     def print_game_info(self):
         print(self.status)

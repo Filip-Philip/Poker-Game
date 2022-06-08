@@ -1,20 +1,6 @@
 import pygame
-from backend.PlayerAction import PlayerAction
 
 pygame.init()
-
-
-def action_to_string(action):
-    if action == PlayerAction.FOLD:
-        return "FOLD"
-    elif action == PlayerAction.CHECK:
-        return "CHECK"
-    elif action == PlayerAction.CALL:
-        return "CALL"
-    elif action == PlayerAction.RAISE:
-        return "RAISE"
-    elif action == PlayerAction.ALL_IN:
-        return "ALL IN"
 
 
 class Button:
@@ -25,7 +11,7 @@ class Button:
         self.x_pos = x_pos
         self.y_pos = y_pos
         self.rect = self.image.get_rect(center=(self.x_pos, self.y_pos))
-        self.text_input = action_to_string(action)
+        self.text_input = str(action)
         self.text = self.font.render(self.text_input, True, "white")
         self.text_rect = self.text.get_rect(center=(self.x_pos, self.y_pos))
         self.clicked = False
@@ -53,4 +39,3 @@ class Button:
             self.text = self.font.render(self.text_input, True, "green")
         else:
             self.text = self.font.render(self.text_input, True, "white")
-
