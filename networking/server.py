@@ -15,7 +15,7 @@ class Server:
     ADDRESS = (SERVER, PORT)
     FORMAT = 'utf-8'
     DISCONNECT_MESSAGE = "!DISCONNECT"
-    WAITING_TIME = 60
+    WAITING_TIME = 100
 
     def __init__(self, game):
         self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

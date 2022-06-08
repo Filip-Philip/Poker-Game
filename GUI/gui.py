@@ -133,7 +133,11 @@ class Gui:
             table_layout = pygame.image.load(os.path.join('images', 'Tables', 'table1.png'))
         elif table == 'RED':
             table_layout = pygame.image.load(os.path.join('images', 'Tables', 'table2.png'))
-        table_layout = pygame.transform.scale(table_layout, (self.width, self.height))
+
+        try:
+            table_layout = pygame.transform.scale(table_layout, (self.width, self.height))
+        except UnboundLocalError as error:
+            print(error, "No such table value!", sep='\n')
         self.window.blit(table_layout, (0, 0))
 
     def get_scaled_reverse(self, reverse):
@@ -141,7 +145,11 @@ class Gui:
             deck = pygame.image.load(os.path.join('images', 'Reverses', '4.png'))
         elif reverse == 'BLUE':
             deck = pygame.image.load(os.path.join('images', 'Reverses', '1.png'))
-        deck = pygame.transform.scale(deck, self.card_size)
+
+        try:
+            deck = pygame.transform.scale(deck, self.card_size)
+        except UnboundLocalError as error:
+            print(error, "No such reverse value!", sep='\n')
         return deck
 
     def add_deck(self, reverse='RED'):
@@ -163,7 +171,7 @@ class Gui:
         else:
             solution_y = solution_y[1]
 
-        return solution_x + self.width / 2 - self.card_size[0] / 2, -solution_y + 1.8 * self.height / 6 # here changed
+        return solution_x + self.width / 2 - self.card_size[0] / 2, -solution_y + 1.8 * self.height / 6 + self.card_size[1] // 2 # here changed
 
     def adjust_card_coordinates(self, position):
         return (position[0] + self.cards_overlapping[0],
@@ -179,7 +187,10 @@ class Gui:
 
         for player in self.client.game.players.list:
             self.players_coordinates[player.name] = start_position
-            start_position = self.find_next_point_on_ellipse(a, b, start_position, distance_between_players)
+            try:
+                start_position = self.find_next_point_on_ellipse(a, b, start_position, distance_between_players)
+            except UnboundLocalError as error:
+                print(error, "Distance between players not established yet!", sep='\n')
 
     def draw_hole_cards(self, reverse='RED'):
         for player in self.client.game.players.list:
@@ -196,10 +207,13 @@ class Gui:
                 card1 = self.get_scaled_reverse(reverse)
                 card2 = self.get_scaled_reverse(reverse)
 
-            pos_first_card = self.players_coordinates[player.name]
-            self.window.blit(card1, pos_first_card)
-            pos_second_card = self.adjust_card_coordinates(pos_first_card)
-            self.window.blit(card2, pos_second_card)
+            try:
+                pos_first_card = self.players_coordinates[player.name]
+                self.window.blit(card1, pos_first_card)
+                pos_second_card = self.adjust_card_coordinates(pos_first_card)
+                self.window.blit(card2, pos_second_card)
+            except UnboundLocalError as error:
+                print(error, "Cards not dealt yet!", sep='\n')
 
     def show_statuses(self):
         font = pygame.font.Font("freesansbold.ttf", 16)
