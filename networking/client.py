@@ -54,9 +54,7 @@ class Client:
 
 
 if __name__ == "__main__":
-    player_nickname = sys.argv[1]
     client = Client()
-    # client.send(player_nickname)
     client.start()
     gui = Gui(900, 480, client)
     gui.run()
