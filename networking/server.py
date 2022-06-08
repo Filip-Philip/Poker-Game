@@ -54,10 +54,9 @@ class Server:
                 if message == self.DISCONNECT_MESSAGE:
                     connected = False
 
+                print(f"[{address}] {message}")
                 self.game.handle_action(self.active_clients[(connection, address)], message)
                 self.game.print_game_info()
-                print(f"[{address}] {message}")
-
                 self.update_all_clients()
 
         self.active_clients.pop((connection, address))

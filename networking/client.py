@@ -1,7 +1,5 @@
 import socket
 import pickle
-from backend.PlayerAction import PlayerAction
-from backend.Game import Game
 import threading
 import sys
 from GUI.gui import Gui

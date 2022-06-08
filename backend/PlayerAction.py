@@ -11,3 +11,15 @@ class PlayerAction(Enum):
     CALL = auto()  # player folded
 
     ALL_IN = auto()     # player went all in
+
+    def __str__(self):
+        if self == PlayerAction.CALL:
+            return "CALL"
+        elif self == PlayerAction.FOLD:
+            return "FOLD"
+        elif self == PlayerAction.CHECK:
+            return "CHECK"
+        elif self == PlayerAction.RAISE:
+            return "RAISE"
+        elif self == PlayerAction.ALL_IN:
+            return "ALL IN"

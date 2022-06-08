@@ -10,10 +10,7 @@ def get_available_actions(player):
         return []
 
     elif player.status == PlayerStatus.TO_CALL:
-        if player.can_bet:
-            return [PlayerAction.CALL, PlayerAction.RAISE, PlayerAction.FOLD, PlayerAction.ALL_IN]
-        else:
-            return [PlayerAction.FOLD, PlayerAction.ALL_IN]
+        return [PlayerAction.CALL, PlayerAction.RAISE, PlayerAction.FOLD, PlayerAction.ALL_IN]
 
     elif player.status == PlayerStatus.IN:
         return [PlayerAction.RAISE, PlayerAction.FOLD, PlayerAction.CHECK, PlayerAction.ALL_IN]
@@ -44,7 +41,7 @@ class Player:
         self.status = status
 
     def can_bet(self, bet_value):
-        if bet_value > self.funds:
+        if bet_value >= self.funds:
             return False
         else:
             return True
