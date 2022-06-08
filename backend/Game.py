@@ -88,9 +88,12 @@ class Game:
         return True
 
     def betting_not_required(self):
-        if self.players.betting_players_number() < 2:
-            return True
-        return False
+        if self.players.betting_players_number() >= 2:
+            return False
+        for player in self.players.list:
+            if player.status in [PlayerStatus.TO_CALL, PlayerStatus.TO_MOVE]:
+                return False
+        return True
 
     def can_still_play(self):
         if self.players.active_players_number() == 1:

@@ -18,7 +18,7 @@ CARD = (3, 5)
 
 class Gui:
     FPS = 60
-    CARD_IMAGE_REDUCTION_VALUE = 10
+    CARD_IMAGE_REDUCTION_VALUE = 5.5
     pygame.init()
 
     def __init__(self, width, height, client):
@@ -27,7 +27,7 @@ class Gui:
         self.width = width
         self.height = height
         self.placement_of_deck = (self.width // 4.7, self.height // 2.9)
-        self.card_size = (self.height // self.CARD_IMAGE_REDUCTION_VALUE, self.width // self.CARD_IMAGE_REDUCTION_VALUE)
+        self.card_size = (self.height // self.CARD_IMAGE_REDUCTION_VALUE // 2, self.height // self.CARD_IMAGE_REDUCTION_VALUE)
         self.button_size = (self.width // 5, self.height // 10)
         self.status_field_size = (self.width // 14, self.height // 8)
         self.cards_overlapping = (self.card_size[0] // 4, self.card_size[1] // 5)
@@ -196,7 +196,7 @@ class Gui:
             self.window.blit(card2, pos_second_card)
 
     def show_statuses(self):
-        font = pygame.font.Font("freesansbold.ttf", int(0.1 * self.card_size[1]))
+        font = pygame.font.Font("freesansbold.ttf", 16)
         info = font.render(self.client.game.status.name + " "
                            "Current player: " + self.client.game.players.current_player.name + " " +
                            " In pot = " + str(self.client.game.pot) + " " +

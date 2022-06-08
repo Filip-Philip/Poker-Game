@@ -55,7 +55,7 @@ class Server:
 
                 print(f"[{address}] {message}")
                 self.game.handle_action(self.active_clients[(connection, address)], message)
-
+                self.game.print_game_info()
                 self.update_all_clients()
 
         self.active_clients.pop((connection, address))
