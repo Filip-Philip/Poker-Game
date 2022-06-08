@@ -1,5 +1,5 @@
-from backend.PlayerStatus import PlayerStatus
-from backend.PlayerAction import PlayerAction
+from backend.player_status import PlayerStatus
+from backend.player_action import PlayerAction
 
 
 def get_available_actions(player):

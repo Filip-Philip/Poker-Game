@@ -2,9 +2,9 @@ import socket
 import threading
 import pickle
 
-from backend.GameStatus import GameStatus
-from backend.Player import Player
-from backend.Game import Game
+from backend.game_status import GameStatus
+from backend.player import Player
+from backend.game import Game
 from time import sleep
 
 
@@ -42,7 +42,7 @@ class Server:
             player_name = pickle.loads(connection.recv(message_length))
             self.active_clients[(connection, address)] = Player(player_name, Player.STARTING_FUNDS)
             self.game.players.add_player(self.active_clients[(connection, address)])
-            self.update_all_clients() # added
+            self.update_all_clients()
 
         connected = True
         while connected:

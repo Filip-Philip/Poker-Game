@@ -1,6 +1,6 @@
 from GUI.gui import Gui
-from backend.Game import Game
-from backend.Player import Player
+from backend.game import Game
+from backend.player import Player
 
 if __name__ == "__main__":
     WIDTH, HEIGHT = 1500, 800

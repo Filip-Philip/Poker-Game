@@ -1,6 +1,6 @@
 from functools import total_ordering
-from backend.Suit import Suit
-from backend.Type import Type
+from backend.suit import Suit
+from backend.type import Type
 import os
 
 

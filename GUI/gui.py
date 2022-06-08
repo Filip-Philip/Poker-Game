@@ -2,14 +2,14 @@ import pygame
 import os
 import sys
 import operator
-from backend.GameStatus import GameStatus
-from backend.PlayerStatus import PlayerStatus
+from backend.game_status import GameStatus
+from backend.player_status import PlayerStatus
 from sympy.solvers import solve
 from sympy import Symbol
 from GUI.button import Button
-from backend.PlayerAction import PlayerAction
+from backend.player_action import PlayerAction
 from GUI.status_window import StatusWindow
-from GUI.TextInputBox import TextInputBox
+from GUI.text_box import TextInputBox
 
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)

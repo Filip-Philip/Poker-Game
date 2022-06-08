@@ -1,6 +1,6 @@
 from functools import total_ordering
-from backend.Type import Type
-from backend.HandValues import HandValues
+from backend.type import Type
+from backend.hand_values import HandValues
 import operator
 from itertools import permutations
 

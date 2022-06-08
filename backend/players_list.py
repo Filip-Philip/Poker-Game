@@ -1,4 +1,4 @@
-from backend.PlayerStatus import PlayerStatus
+from backend.player_status import PlayerStatus
 
 
 class PlayersList:

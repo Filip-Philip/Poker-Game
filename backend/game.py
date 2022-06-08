@@ -1,10 +1,10 @@
-from backend.Deck import Deck
-from backend.Hand import Hand
-from backend.PlayerStatus import PlayerStatus
-from backend.PlayerAction import PlayerAction
-from backend.PlayersList import PlayersList
-from backend.GameStatus import GameStatus
-from backend.Player import get_available_actions
+from backend.deck import Deck
+from backend.hand import Hand
+from backend.player_status import PlayerStatus
+from backend.player_action import PlayerAction
+from backend.players_list import PlayersList
+from backend.game_status import GameStatus
+from backend.player import get_available_actions
 import random
 
 
